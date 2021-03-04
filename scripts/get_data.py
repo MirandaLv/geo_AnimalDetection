@@ -16,8 +16,8 @@ import skimage
 
 
 
-img = os.path.join(ROOT_DIR, "dataset/processing_data/droneData/bird_30m_translate_wgs84_int.tif")
-polys = os.path.join(ROOT_DIR, "dataset/processing_data/digitizedData/bird_poly_wgs84.shp")
+img = os.path.join(ROOT_DIR, "dataset/raw_data/droneData/bird_30m_translate_wgs84_int.tif")
+polys = os.path.join(ROOT_DIR, "dataset/raw_data/digitizedData/bird_poly_wgs84.shp")
 out = os.path.join(ROOT_DIR, "dataset/processing_data/clipped")
 
 #detector = hub.Module("https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1")
