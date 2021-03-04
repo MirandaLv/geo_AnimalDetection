@@ -16,16 +16,16 @@ import skimage
 
 
 
-img = os.path.join(ROOT_DIR, "dataset/raw_data/droneData/bird_30m_translate_wgs84_int.tif")
+img = os.path.join(ROOT_DIR, "dataset/raw_data/droneData/bird_30m_wgs84.tif")
 polys = os.path.join(ROOT_DIR, "dataset/raw_data/digitizedData/bird_poly_wgs84.shp")
 out = os.path.join(ROOT_DIR, "dataset/processing_data/clipped")
 
 #detector = hub.Module("https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1")
 #print(detector)
 
-df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
+#df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
 a = DP.DataProcessing(ROOT_DIR, img, polys)
-# a.get_patches(256, out)
+a.get_patches(256, out)
 # a.create_meta_df(out)
 
 def create_json(path, jsonpath):
