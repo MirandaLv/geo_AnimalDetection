@@ -44,10 +44,55 @@ class DataProcessing:
             poly_geos = polys[polys['inorout'] == 'in']['geometry'].tolist()
             poly_ids = polys[polys['inorout'] == 'in']['img_id'].tolist()
 
+            self.generate_annotation(img_path, poly_geos)
+
+            outmeta['img_path'].append(img_path)
+            outmeta['poly_ids'].append(poly_ids)
 
         #df = pd.DataFrame.from_dict(outmeta)
         #df.to_csv(os.path.join(self.ROOT_DIR, 'out_meta.csv'), encoding='utf-8', sep=',')
 
+
+    def generate_annotation(self, single_image_path, polygeos):
+
+        try:
+            img = rasterio.open(single_image_path)
+            width = img.width
+            height = img.height
+        except:
+            print(img)
+            raise
+
+        basename = os.path.basename(single_image_path)
+        annotationfile = '/'.join(os.path.dirname(single_image_path).split('/')[:-1])+ '/annotations/' + basename.split('.')[0] + '.json'
+
+        image_dict = {"image_path": single_image_path, "image_name": basename,"annotations": [], "width": width, "height": height}
+
+
+        for idx in range(len(polygeos)):
+
+            assert isinstance(polygeos[idx], shapely.geometry.polygon.Polygon)
+
+            label_dict = {"label": 'bird'}
+            regions = dict()
+
+            minx, miny, maxx, maxy = polygeos[idx].bounds
+
+            lur, luc = img.index(minx, maxy)
+            brr, brc = img.index(maxx, miny)
+
+            # win = ((r - dim / 2, r + dim / 2), (c - dim / 2, c + dim / 2))
+
+            regions['minx'] = lur
+            regions['maxy'] = luc
+            regions['maxx'] = brr
+            regions['miny'] = brc
+
+            label_dict['region'] = regions
+            image_dict['annotations'].append(label_dict)
+
+        with open(annotationfile, 'w') as js:
+            json.dump(image_dict, js)
 
 
     def generate_json(self):
