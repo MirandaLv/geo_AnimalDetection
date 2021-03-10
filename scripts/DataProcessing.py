@@ -8,6 +8,7 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 import json
+import random
 
 
 class DataProcessing:
@@ -71,7 +72,7 @@ class DataProcessing:
 
         for idx in range(len(polygeos)):
 
-            assert isinstance(polygeos[idx], shapely.geometry.polygon.Polygon)
+            # assert isinstance(polygeos[idx], shapely.geometry.polygon.Polygon)
 
             label_dict = {"label": 'bird'}
             regions = dict()
@@ -156,6 +157,25 @@ class DataProcessing:
 
             with rasterio.open(img_out, 'w', **out_meta) as dst:
                 dst.write(data)
+
+
+
+    def prepare_train_val(self, annote_path, nrandom=True, train_val=0.3, train=0.2):
+
+        assert os.path.isdir(annote_path)
+        allfiles = [os.path.join(annote_path, name) for name in os.listdir(annote_path) if os.path.isfile(os.path.join(annote_path, name))]
+
+        df = pd.DataFrame()
+        for file in allfiles:
+            data = pd.read_json(file)
+
+
+
+
+
+
+
+
 
 
 

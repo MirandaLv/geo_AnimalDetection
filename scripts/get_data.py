@@ -17,16 +17,18 @@ import skimage
 
 
 img = os.path.join(ROOT_DIR, "dataset/raw_data/droneData/bird_30m_wgs84.tif")
-polys = os.path.join(ROOT_DIR, "dataset/raw_data/digitizedData/bird_poly_wgs84.shp")
+polys = os.path.join(ROOT_DIR, "dataset/raw_data/digitizedData/bird_poly.geojson")
 out = os.path.join(ROOT_DIR, "dataset/processing_data/clipped")
+annotation = os.path.join(ROOT_DIR, "dataset/processing_data/annotations")
 
 #detector = hub.Module("https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1")
 #print(detector)
 
-#df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
+# df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
 a = DP.DataProcessing(ROOT_DIR, img, polys)
-a.get_patches(256, out)
-# a.create_meta_df(out)
+a.prepare_train_val(annotation)
+#a.get_patches(256, out)
+#a.create_meta_df(out)
 
 def create_json(path, jsonpath):
 
@@ -41,7 +43,10 @@ def create_json(path, jsonpath):
     with open(jsonpath, 'w') as js:
         json.dump(file_dict, js)
 
-create_json("/home/mirandalv/Documents/github/ObjectDetection/dataset/annotation_val", "/home/mirandalv/Documents/github/ObjectDetection/dataset/val/annotation.json")
+#create_json("/home/mirandalv/Documents/github/ObjectDetection/dataset/annotation_val", "/home/mirandalv/Documents/github/ObjectDetection/dataset/val/annotation.json")
 
 #jsontest = r"/home/mirandalv/Documents/github/ObjectDetection/dataset/annotation/1.json"
 #json.load(jsontest)
+
+
+#a.prepare_train_val(annote_path, train_random=0.2, val_random=0.2)
