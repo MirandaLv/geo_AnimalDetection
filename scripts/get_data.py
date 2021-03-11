@@ -14,19 +14,18 @@ import json
 import skimage
 
 
-
-
 img = os.path.join(ROOT_DIR, "dataset/raw_data/droneData/bird_30m_wgs84.tif")
 polys = os.path.join(ROOT_DIR, "dataset/raw_data/digitizedData/bird_poly.geojson")
 out = os.path.join(ROOT_DIR, "dataset/processing_data/clipped")
 annotation = os.path.join(ROOT_DIR, "dataset/processing_data/annotations")
+agg_annote = os.path.join(ROOT_DIR, "dataset/processing_data/agg.csv")
 
 #detector = hub.Module("https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1")
 #print(detector)
 
 # df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
 a = DP.DataProcessing(ROOT_DIR, img, polys)
-a.prepare_train_val(annotation)
+a.prepare_train_val(annotation, agg_annote)
 #a.get_patches(256, out)
 #a.create_meta_df(out)
 

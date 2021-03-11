@@ -160,14 +160,51 @@ class DataProcessing:
 
 
 
-    def prepare_train_val(self, annote_path, nrandom=True, train_val=0.3, train=0.2):
+    def prepare_train_val(self, annote_path, agg_path):
 
         assert os.path.isdir(annote_path)
         allfiles = [os.path.join(annote_path, name) for name in os.listdir(annote_path) if os.path.isfile(os.path.join(annote_path, name))]
 
-        df = pd.DataFrame()
+        df = pd.DataFrame(columns=['image_path', 'image_name', 'label', 'maxx', 'minx', 'maxy', 'miny'])
         for file in allfiles:
-            data = pd.read_json(file)
+            f = open(file)
+            data = json.load(f)
+
+            temp_dict = dict()
+            minxls = list()
+            maxxls = list()
+            minyls = list()
+            maxyls = list()
+
+            c_obj = len(data['annotations'])
+            for c in range(0,c_obj):
+                minxls.append(data['annotations'][c]['region']['minx'])
+                maxxls.append(data['annotations'][c]['region']['maxx'])
+                minyls.append(data['annotations'][c]['region']['miny'])
+                maxyls.append(data['annotations'][c]['region']['maxy'])
+
+            labelist = [data['annotations'][0]['label']] * c_obj
+            img_paths = [data['image_path']] * c_obj
+            img_names = [data['image_name']] * c_obj
+
+            temp_dict['minx'] = minxls
+            temp_dict['maxx'] = maxxls
+            temp_dict['miny'] = minyls
+            temp_dict['maxy'] = maxyls
+            temp_dict['label'] = labelist
+            temp_dict['image_path'] = img_paths
+            temp_dict['image_name'] = img_names
+
+            df = df.append(pd.DataFrame.from_dict(temp_dict))
+
+        df.to_csv(agg_path, encoding='utf-8', sep=',', index=False)
+
+
+
+
+
+
+
 
 
 
