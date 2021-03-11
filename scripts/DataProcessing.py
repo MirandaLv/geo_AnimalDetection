@@ -160,7 +160,7 @@ class DataProcessing:
 
 
 
-    def prepare_train_val(self, annote_path, agg_path):
+    def prepare_train_val(self, annote_path, agg_path, train_csv):
 
         assert os.path.isdir(annote_path)
         allfiles = [os.path.join(annote_path, name) for name in os.listdir(annote_path) if os.path.isfile(os.path.join(annote_path, name))]
@@ -197,7 +197,45 @@ class DataProcessing:
 
             df = df.append(pd.DataFrame.from_dict(temp_dict))
 
+        self.get_train(df, train_csv, train_rate=0.05)
+
         df.to_csv(agg_path, encoding='utf-8', sep=',', index=False)
+
+
+    def get_train(self, df, train_csv, train_rate=0.05):
+
+        img_count = df['image_path'].nunique()
+        ctrain= int(img_count * train_rate)
+
+        img_train = random.sample(range(0,img_count), ctrain)
+        df['id'] = df.apply(lambda x: int(x['image_name'].split('.')[0]), axis=1)
+        train_df = df[df['id'].isin(img_train)]
+
+        train_df.to_csv(train_csv, encoding='utf-8', sep=',', index=False)
+        txt_path = train_csv.split('.')[0] + '.txt'
+
+        self.csv2txt(train_csv, txt_path)
+
+
+
+    def csv2txt(self, fcsv, txt_path):
+
+        df = pd.read_csv(fcsv, encoding='utf-8', sep=',')
+        data = pd.DataFrame()
+        data['format'] = df['image_path']
+
+        """
+        # as the images are in train_images folder, add train_images before the image name
+        for i in range(data.shape[0]):
+            data['format'][i] = 'train_images/' + data['format'][i]
+        """
+        # add xmin, ymin, xmax, ymax and class as per the format required
+        for i in range(data.shape[0]):
+            data['format'][i] = data['format'][i] + ',' + str(df['minx'][i]) + ',' + str(
+                df['miny'][i]) + ',' + str(df['maxx'][i]) + ',' + str(df['maxy'][i]) + ',' + \
+                                df['label'][i]
+
+        data.to_csv(txt_path, header=None, index=None, sep=' ')
 
 
 
