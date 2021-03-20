@@ -1,0 +1,8 @@
+#!/bin/tcsh 
+#PBS -N animal_faster
+#PBS -l nodes=1:hima:ppn=20 
+#PBS -l walltime=72:00:00 
+#PBS -j oe 
+
+
+python /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/train_frcnn.py -o simple -p /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/dataset/processing_data/train_annotation.txt

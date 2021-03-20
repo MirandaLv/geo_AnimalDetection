@@ -6,7 +6,7 @@ import sys
 import pandas as pd
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../")
-# Import maskRCNN
+#ROOT_DIR = os.path.abspath("")
 sys.path.append(ROOT_DIR)
 import geopandas as gpd
 import DataProcessing as DP
@@ -26,10 +26,11 @@ agg_train = os.path.join(ROOT_DIR, "dataset/processing_data/train_annotation.csv
 
 # df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
 a = DP.DataProcessing(ROOT_DIR, img, polys)
-a.prepare_train_val(annotation, agg_annote, agg_train)
 
-#a.get_patches(256, out)
-#a.create_meta_df(out)
+a.get_patches(256, out)
+a.create_meta_df(out)
+
+a.prepare_train_val(annotation, agg_annote, agg_train)
 
 def create_json(path, jsonpath):
 

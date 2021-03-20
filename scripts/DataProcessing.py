@@ -189,8 +189,8 @@ class DataProcessing:
 
             temp_dict['minx'] = minxls
             temp_dict['maxx'] = maxxls
-            temp_dict['miny'] = minyls
-            temp_dict['maxy'] = maxyls
+            temp_dict['miny'] = maxyls
+            temp_dict['maxy'] = minyls
             temp_dict['label'] = labelist
             temp_dict['image_path'] = img_paths
             temp_dict['image_name'] = img_names
