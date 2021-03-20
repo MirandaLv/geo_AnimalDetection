@@ -79,6 +79,7 @@ class DataProcessing:
 
             minx, miny, maxx, maxy = polygeos[idx].bounds
 
+            """
             lur, luc = img.index(minx, maxy)
             brr, brc = img.index(maxx, miny)
 
@@ -88,6 +89,25 @@ class DataProcessing:
             regions['maxy'] = luc
             regions['maxx'] = brr
             regions['miny'] = brc
+            """
+
+            lur, luc = img.index(minx, maxy) #maxy, maxx
+            brr, brc = img.index(maxx, miny) #miny, minx
+
+            # win = ((r - dim / 2, r + dim / 2), (c - dim / 2, c + dim / 2))
+
+            regions['minx'] = brc
+            regions['maxy'] = lur
+            regions['maxx'] = luc
+            regions['miny'] = brr
+
+
+            """
+            xmin = row.miny
+            xmax = row.maxy
+            ymin = row.maxx
+            ymax = row.minx
+            """
 
             label_dict['region'] = regions
             image_dict['annotations'].append(label_dict)
