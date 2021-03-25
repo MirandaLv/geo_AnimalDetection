@@ -90,24 +90,21 @@ class DataProcessing:
             regions['maxx'] = brr
             regions['miny'] = brc
             """
-
+            # r, c = img.index(lon, lat)
             lur, luc = img.index(minx, maxy) #maxy, maxx
             brr, brc = img.index(maxx, miny) #miny, minx
 
             # win = ((r - dim / 2, r + dim / 2), (c - dim / 2, c + dim / 2))
 
-            regions['minx'] = brc
-            regions['maxy'] = lur
-            regions['maxx'] = luc
-            regions['miny'] = brr
+            if luc < 0:
+                luc = 0
+            if lur < 0:
+                lur = 0
 
-
-            """
-            xmin = row.miny
-            xmax = row.maxy
-            ymin = row.maxx
-            ymax = row.minx
-            """
+            regions['xmin'] = luc
+            regions['ymax'] = brr
+            regions['xmax'] = brc
+            regions['ymin'] = lur
 
             label_dict['region'] = regions
             image_dict['annotations'].append(label_dict)
@@ -180,12 +177,12 @@ class DataProcessing:
 
 
 
-    def prepare_train_val(self, annote_path, agg_path, train_csv):
+    def prepare_train_val(self, annote_path, agg_path, train_csv, test_csv):
 
         assert os.path.isdir(annote_path)
         allfiles = [os.path.join(annote_path, name) for name in os.listdir(annote_path) if os.path.isfile(os.path.join(annote_path, name))]
 
-        df = pd.DataFrame(columns=['image_path', 'image_name', 'label', 'maxx', 'minx', 'maxy', 'miny'])
+        df = pd.DataFrame(columns=['image_path', 'image_name', 'label', 'xmin', 'xmax', 'ymin', 'ymax'])
         for file in allfiles:
             f = open(file)
             data = json.load(f)
@@ -198,43 +195,49 @@ class DataProcessing:
 
             c_obj = len(data['annotations'])
             for c in range(0,c_obj):
-                minxls.append(data['annotations'][c]['region']['minx'])
-                maxxls.append(data['annotations'][c]['region']['maxx'])
-                minyls.append(data['annotations'][c]['region']['miny'])
-                maxyls.append(data['annotations'][c]['region']['maxy'])
+                minxls.append(data['annotations'][c]['region']['xmin'])
+                maxxls.append(data['annotations'][c]['region']['xmax'])
+                minyls.append(data['annotations'][c]['region']['ymin'])
+                maxyls.append(data['annotations'][c]['region']['ymax'])
 
             labelist = [data['annotations'][0]['label']] * c_obj
             img_paths = [data['image_path']] * c_obj
             img_names = [data['image_name']] * c_obj
 
-            temp_dict['minx'] = minxls
-            temp_dict['maxx'] = maxxls
-            temp_dict['miny'] = maxyls
-            temp_dict['maxy'] = minyls
+            temp_dict['xmin'] = minxls
+            temp_dict['xmax'] = maxxls
+            temp_dict['ymin'] = minyls
+            temp_dict['ymax'] = maxyls
             temp_dict['label'] = labelist
             temp_dict['image_path'] = img_paths
             temp_dict['image_name'] = img_names
 
             df = df.append(pd.DataFrame.from_dict(temp_dict))
 
-        self.get_train(df, train_csv, train_rate=0.05)
-
         df.to_csv(agg_path, encoding='utf-8', sep=',', index=False)
+        self.get_train_test(df, train_csv, test_csv, train_rate=0.05)
 
 
-    def get_train(self, df, train_csv, train_rate=0.05):
+    def get_train_test(self, df, train_csv, test_csv, train_rate=0.05):
 
         img_count = df['image_path'].nunique()
         ctrain= int(img_count * train_rate)
 
-        img_train = random.sample(range(0,img_count), ctrain)
+        img_train = random.sample(range(img_count), ctrain)
+        img_test = [ix for ix in range(img_count) if ix not in img_train]
+
         df['id'] = df.apply(lambda x: int(x['image_name'].split('.')[0]), axis=1)
         train_df = df[df['id'].isin(img_train)]
+        test_df = df[df['id'].isin(img_test)]
 
         train_df.to_csv(train_csv, encoding='utf-8', sep=',', index=False)
-        txt_path = train_csv.split('.')[0] + '.txt'
+        txt_train_path = train_csv.split('.')[0] + '.txt'
 
-        self.csv2txt(train_csv, txt_path)
+        test_df.to_csv(test_csv, encoding='utf-8', sep=',', index=False)
+        txt_test_path = test_csv.split('.')[0] + '.txt'
+
+        self.csv2txt(train_csv, txt_train_path)
+        self.csv2txt(test_csv, txt_test_path)
 
 
 
@@ -251,8 +254,8 @@ class DataProcessing:
         """
         # add xmin, ymin, xmax, ymax and class as per the format required
         for i in range(data.shape[0]):
-            data['format'][i] = data['format'][i] + ',' + str(df['minx'][i]) + ',' + str(
-                df['miny'][i]) + ',' + str(df['maxx'][i]) + ',' + str(df['maxy'][i]) + ',' + \
+            data['format'][i] = data['format'][i] + ',' + str(df['xmin'][i]) + ',' + str(
+                df['ymin'][i]) + ',' + str(df['xmax'][i]) + ',' + str(df['ymax'][i]) + ',' + \
                                 df['label'][i]
 
         data.to_csv(txt_path, header=None, index=None, sep=' ')

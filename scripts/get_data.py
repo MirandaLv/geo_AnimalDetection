@@ -20,6 +20,7 @@ out = os.path.join(ROOT_DIR, "dataset/processing_data/clipped")
 annotation = os.path.join(ROOT_DIR, "dataset/processing_data/annotations")
 agg_annote = os.path.join(ROOT_DIR, "dataset/processing_data/agg.csv")
 agg_train = os.path.join(ROOT_DIR, "dataset/processing_data/train_annotation.csv")
+agg_test = os.path.join(ROOT_DIR, "dataset/processing_data/test_annotation.csv")
 
 #detector = hub.Module("https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1")
 #print(detector)
@@ -30,7 +31,7 @@ a = DP.DataProcessing(ROOT_DIR, img, polys)
 a.get_patches(256, out)
 a.create_meta_df(out)
 
-a.prepare_train_val(annotation, agg_annote, agg_train)
+a.prepare_train_val(annotation, agg_annote, agg_train, agg_test)
 
 def create_json(path, jsonpath):
 
