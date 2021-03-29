@@ -1,8 +1,8 @@
 #!/bin/tcsh 
-#PBS -N animal_faster
-#PBS -l nodes=1:hima:ppn=20 
+#PBS -N animal_faster_nogpu
+#PBS -l nodes=1:hima:ppn=10
 #PBS -l walltime=72:00:00 
 #PBS -j oe 
 
 
-python /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/train_frcnn.py -o simple -p /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/dataset/processing_data/train_annotation.txt
+python /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/train_frcnn.py -o simple -p /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/dataset/processing_data/train_annotation.txt --input_weight_path /sciclone/data10/zlv/CNN_ObjectDetection/geo_AnimalDetection/weights/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5 --num_epochs 100
