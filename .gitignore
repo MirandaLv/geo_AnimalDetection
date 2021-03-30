@@ -9,6 +9,7 @@ __pycache__/
 *.gz
 *.tar.gz
 *.tar
+*.json
 # C extensions
 *.so
 
