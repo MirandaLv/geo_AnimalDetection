@@ -177,7 +177,7 @@ class DataProcessing:
 
 
 
-    def prepare_train_val(self, annote_path, agg_path, train_csv, test_csv):
+    def prepare_train_val(self, annote_path, agg_path, train_csv, test_csv, train_rate=0.3):
 
         assert os.path.isdir(annote_path)
         allfiles = [os.path.join(annote_path, name) for name in os.listdir(annote_path) if os.path.isfile(os.path.join(annote_path, name))]
@@ -215,10 +215,10 @@ class DataProcessing:
             df = df.append(pd.DataFrame.from_dict(temp_dict))
 
         df.to_csv(agg_path, encoding='utf-8', sep=',', index=False)
-        self.get_train_test(df, train_csv, test_csv, train_rate=0.05)
+        self.get_train_test(df, train_csv, test_csv, train_rate)
 
 
-    def get_train_test(self, df, train_csv, test_csv, train_rate=0.05):
+    def get_train_test(self, df, train_csv, test_csv, train_rate):
 
         img_count = df['image_path'].nunique()
         ctrain= int(img_count * train_rate)

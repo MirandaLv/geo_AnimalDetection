@@ -25,13 +25,15 @@ agg_test = os.path.join(ROOT_DIR, "dataset/processing_data/test_annotation.csv")
 #detector = hub.Module("https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1")
 #print(detector)
 
+train_rate = 0.3
+
 # df = pd.read_csv(os.path.join(ROOT_DIR, "out_meta.csv"), encoding='utf-8', sep=',')
 a = DP.DataProcessing(ROOT_DIR, img, polys)
 
 a.get_patches(256, out)
 a.create_meta_df(out)
 
-a.prepare_train_val(annotation, agg_annote, agg_train, agg_test)
+a.prepare_train_val(annotation, agg_annote, agg_train, agg_test, train_rate)
 
 def create_json(path, jsonpath):
 
