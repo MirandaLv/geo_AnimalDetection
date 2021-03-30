@@ -13,6 +13,14 @@ from keras.layers import Input
 from keras.models import Model
 from keras.backend.tensorflow_backend import set_session
 from keras_frcnn import roi_helpers
+import pandas as pd
+
+# get the predicted bounding box to a csv
+img_name_list = []
+x1_list = []
+x2_list = []
+y1_list = []
+y2_list = []
 
 sys.setrecursionlimit(40000)
 
@@ -236,6 +244,12 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 
 			(real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
+			img_name_list.append(img_name)
+			x1_list.append(real_x1)
+			x2_list.append(real_x2)
+			y1_list.append(real_y1)
+			y2_list.append(real_y2)
+
 			cv2.rectangle(img,(real_x1, real_y1), (real_x2, real_y2), (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])),2)
 
 			textLabel = f'{key}: {int(100*new_probs[jk])}'
@@ -254,4 +268,7 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 
 	
 	cv2.imwrite('./results_imgs-fp-mappen-test/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
+
+df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
+df.to_csv("bounding_box_coordinates_ans.csv", sep=',',index=False)
 
