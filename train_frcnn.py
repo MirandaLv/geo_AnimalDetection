@@ -165,6 +165,8 @@ model_all = Model([img_input, roi_input], rpn[:2] + classifier)
 
 
 C.record_path = options.record_path
+#base_path = os.path.abspath(".")
+#record_path = os.path.join(base_path, "record.csv")
 
 # The cdsw runs the session an hour and then it will be connected again
 # we need to save the model and load the model to continue training

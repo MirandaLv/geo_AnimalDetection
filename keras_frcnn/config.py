@@ -58,3 +58,4 @@ class Config:
 
 		# self.model_path = 'model_frcnn.vgg.hdf5'
 		self.model_path = 'model_frcnn.{}.hdf5'.format(self.network)
+		#self.record_path = None
