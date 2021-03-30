@@ -19,6 +19,7 @@ from keras_frcnn import losses as losses
 import keras_frcnn.roi_helpers as roi_helpers
 from keras.utils import generic_utils
 from keras.callbacks import TensorBoard
+import pandas as pd
 
 
 # tensorboard log function
@@ -50,6 +51,7 @@ parser.add_option("--config_filename", dest="config_filename",
                   default="config.pickle")
 parser.add_option("--output_weight_path", dest="output_weight_path", help="Output path for weights.", default='./model_frcnn.hdf5')
 parser.add_option("--input_weight_path", dest="input_weight_path", help="Input path for weights. If not specified, will try to load default weights provided by keras.")
+parser.add_option("--record_path", dest="record_path", help="The path to save each epoch results for checking model accuracy.", default='./record_path.csv')
 
 (options, args) = parser.parse_args()
 
@@ -160,6 +162,51 @@ model_classifier = Model([img_input, roi_input], classifier)
 # this is a model that holds both the RPN and the classifier, used to load/save weights for the models
 model_all = Model([img_input, roi_input], rpn[:2] + classifier)
 
+
+
+C.record_path = options.record_path
+
+# The cdsw runs the session an hour and then it will be connected again
+# we need to save the model and load the model to continue training
+if not os.path.isfile(C.model_path):
+    # If this is the begin of the training, load the pre-traind base network such as vgg-16
+    try:
+        print('This is the first time of your training')
+        print('loading weights from {}'.format(C.base_net_weights))
+        model_rpn.load_weights(C.base_net_weights, by_name=True)
+        model_classifier.load_weights(C.base_net_weights, by_name=True)
+    except:
+        print('Could not load pretrained model weights. Weights can be found in the keras application folder \
+            https://github.com/fchollet/keras/tree/master/keras/applications')
+
+    # Create the record.csv file to record losses, acc and mAP
+    record_df = pd.DataFrame(
+        columns=['mean_overlapping_bboxes', 'class_acc', 'loss_rpn_cls', 'loss_rpn_regr', 'loss_class_cls',
+                 'loss_class_regr', 'curr_loss', 'elapsed_time', 'mAP'])
+else:
+    # If this is a continued training, load the trained model from before
+    print('Continue training based on previous trained model')
+    print('Loading weights from {}'.format(C.model_path))
+    model_rpn.load_weights(C.model_path, by_name=True)
+    model_classifier.load_weights(C.model_path, by_name=True)
+
+    # Load the records
+    record_df = pd.read_csv(C.record_path)
+
+    r_mean_overlapping_bboxes = record_df['mean_overlapping_bboxes']
+    r_class_acc = record_df['class_acc']
+    r_loss_rpn_cls = record_df['loss_rpn_cls']
+    r_loss_rpn_regr = record_df['loss_rpn_regr']
+    r_loss_class_cls = record_df['loss_class_cls']
+    r_loss_class_regr = record_df['loss_class_regr']
+    r_curr_loss = record_df['curr_loss']
+    r_elapsed_time = record_df['elapsed_time']
+    r_mAP = record_df['mAP']
+
+    print('Already train %dK batches' % (len(record_df)))
+
+
+
 try:
     # load_weights by name
     # some keras application model does not containing name
@@ -188,18 +235,28 @@ callback = TensorBoard(log_path)
 callback.set_model(model_all)
 
 
+# Training setting
+total_epochs = len(record_df)
+r_epochs = len(record_df)
 
 epoch_length = 30
 num_epochs = int(options.num_epochs)
 iter_num = 0
 train_step = 0 # add train steps
 
+total_epochs += num_epochs
+
 losses = np.zeros((epoch_length, 5))
 rpn_accuracy_rpn_monitor = []
 rpn_accuracy_for_epoch = []
 start_time = time.time()
 
-best_loss = np.Inf
+# best_loss = np.Inf
+
+if len(record_df)==0:
+    best_loss = np.Inf
+else:
+    best_loss = np.min(r_curr_loss)
 
 class_mapping_inv = {v: k for k, v in class_mapping.items()}
 print('Starting training')
@@ -209,7 +266,10 @@ print('Starting training')
 for epoch_num in range(num_epochs):
 
     progbar = generic_utils.Progbar(epoch_length)   # keras progress bar
-    print('Epoch {}/{}'.format(epoch_num + 1, num_epochs))
+    # print('Epoch {}/{}'.format(epoch_num + 1, num_epochs))
+    print('Epoch {}/{}'.format(r_epochs + 1, total_epochs))
+
+    r_epochs += 1
 
     while True:
         # try:
@@ -320,6 +380,7 @@ for epoch_num in range(num_epochs):
                 print('Loss Detector classifier: {}'.format(loss_class_cls))
                 print('Loss Detector regression: {}'.format(loss_class_regr))
                 print('Elapsed time: {}'.format(time.time() - start_time))
+                elapsed_time = (time.time() - start_time) / 60
 
             curr_loss = loss_rpn_cls + loss_rpn_regr + loss_class_cls + loss_class_regr
             iter_num = 0
@@ -337,6 +398,19 @@ for epoch_num in range(num_epochs):
                     print('Total loss decreased from {} to {}, saving weights'.format(best_loss,curr_loss))
                 best_loss = curr_loss
                 model_all.save_weights(C.model_path)
+
+            new_row = {'mean_overlapping_bboxes': round(mean_overlapping_bboxes, 3),
+                       'class_acc': round(class_acc, 3),
+                       'loss_rpn_cls': round(loss_rpn_cls, 3),
+                       'loss_rpn_regr': round(loss_rpn_regr, 3),
+                       'loss_class_cls': round(loss_class_cls, 3),
+                       'loss_class_regr': round(loss_class_regr, 3),
+                       'curr_loss': round(curr_loss, 3),
+                       'elapsed_time': round(elapsed_time, 3),
+                       'mAP': 0}
+
+            record_df = record_df.append(new_row, ignore_index=True)
+            record_df.to_csv(C.record_path, index=0)
 
             break
 
