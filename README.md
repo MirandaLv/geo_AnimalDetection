@@ -13,8 +13,8 @@ Step2. The train_fcnn.py is used to train the model based on the customed datase
 
 
 ## Script description
-DataProcessing.py includes a series of support functions to preprocess the raw image and generate the image patches and annotations for training and validation.
-get_data.py is a call script used to generate the image patches and annotations. The dimension of image patches can be assigned in here.
-data_aggregation.py include script to split the raw image into image patches, these image patches will be used later on as input for model prediction.
-jobscript: a script to submit jobs on sciclone
+- DataProcessing.py includes a series of support functions to preprocess the raw image and generate the image patches and annotations for training and validation.
+- get_data.py is a call script used to generate the image patches and annotations. The dimension of image patches can be assigned in here.
+- data_aggregation.py include script to split the raw image into image patches, these image patches will be used later on as input for model prediction.
+- jobscript: a script to submit jobs on sciclone
 
