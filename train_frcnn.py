@@ -136,7 +136,7 @@ print('Num test samples {}'.format(len(test_imgs)))
 
 # groundtruth anchor
 data_gen_train = data_generators.get_anchor_gt(train_imgs, classes_count, C, nn.get_img_output_length, K.image_dim_ordering(), mode='train')
-data_gen_test = data_generators.get_anchor_gt(test_imgs, classes_count, C, nn.get_img_output_length, K.image_dim_ordering(), mode='test')
+# data_gen_test = data_generators.get_anchor_gt(test_imgs, classes_count, C, nn.get_img_output_length, K.image_dim_ordering(), mode='test')
 
 print(data_gen_train)
 
@@ -146,31 +146,34 @@ if K.image_dim_ordering() == 'th':
 else:
     input_shape_img = (None, None, 3)
 
-# input placeholder 정의
+# Model construction
+
+# input placeholder
 img_input = Input(shape=input_shape_img)
 roi_input = Input(shape=(None, 4))
 
-# base network(feature extractor) 정의 (resnet, VGG, Inception, Inception Resnet V2, etc)
-shared_layers = nn.nn_base(img_input, trainable=True)
+# base network(feature extractor)
+shared_layers = nn.nn_base(img_input, trainable=True) # the feature maps
 
 # define the RPN, built on the base layers
-num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
-rpn = nn.rpn(shared_layers, num_anchors)
+num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios) # the anchor box scale was set based on the object size.
+# a conv2D layer of 512 filters, with a classifier and regressor, the input of conv2D for classifier and regressor has the filter number set to num_anchors
+# Classifier determines the probability of a proposal having the target object. Regression regresses the coordinates of the proposals.
+rpn = nn.rpn(shared_layers, num_anchors) #the outputs are x_class, x_regr, and the input base_layers
 
-# detection network 정의
+# detection network
 classifier = nn.classifier(shared_layers, roi_input, C.num_rois, nb_classes=len(classes_count), trainable=True)
 
-model_rpn = Model(img_input, rpn[:2])
+model_rpn = Model(img_input, rpn[:2]) #Setting the input and output of the model, rpn[:2] is the x_class, and x_regr
 model_classifier = Model([img_input, roi_input], classifier)
 
 # this is a model that holds both the RPN and the classifier, used to load/save weights for the models
 model_all = Model([img_input, roi_input], rpn[:2] + classifier)
 
 
-
 C.record_path = options.record_path
-#base_path = os.path.abspath(".")
-#record_path = os.path.join(base_path, "record.csv")
+# base_path = os.path.abspath(".")
+# record_path = os.path.join(base_path, "record.csv")
 
 # The cdsw runs the session an hour and then it will be connected again
 # we need to save the model and load the model to continue training
@@ -224,6 +227,7 @@ except:
     print('Could not load pretrained model weights. Weights can be found in the keras application folder \
         https://github.com/fchollet/keras/tree/master/keras/applications')
 
+# Set the optimization
 optimizer = Adam(lr=1e-5)
 optimizer_classifier = Adam(lr=1e-5)
 model_rpn.compile(optimizer=optimizer, loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors)])
@@ -238,7 +242,7 @@ if not os.path.isdir(log_path):
 
 # Tensorboard log
 callback = TensorBoard(log_path)
-callback.set_model(model_all)
+callback.set_model(model_all) # Sets Keras model and writes graph if specified.
 
 
 # Training setting
@@ -288,18 +292,18 @@ for epoch_num in range(num_epochs):
                 print('RPN is not producing bounding boxes that overlap the ground truth boxes. Check RPN settings or keep training.')
 
         # data generator
-        X, Y, img_data = next(data_gen_train)
+        X, Y, img_data = next(data_gen_train) #data_gen_train: np.copy(x_img), [np.copy(y_rpn_cls), np.copy(y_rpn_regr)], img_data_aug
 
         loss_rpn = model_rpn.train_on_batch(X, Y)
 
         # add to callback
         write_log(callback, ['rpn_cls_loss', 'rpn_reg_loss'], loss_rpn, train_step)
 
-        P_rpn = model_rpn.predict_on_batch(X)
+        P_rpn = model_rpn.predict_on_batch(X) #output rpn[:2]
 
-        R = roi_helpers.rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(), use_regr=True, overlap_thresh=0.7, max_boxes=300)
+        R = roi_helpers.rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(), use_regr=True, overlap_thresh=0.7, max_boxes=300) #out: boxes, probs (the maximum surpression is implemented before output)
         # note: calc_iou converts from (x1,y1,x2,y2) to (x,y,w,h) format
-        X2, Y1, Y2, IouS = roi_helpers.calc_iou(R, img_data, C, class_mapping)
+        X2, Y1, Y2, IouS = roi_helpers.calc_iou(R, img_data, C, class_mapping) # x2: x_rois (np array), y1: class labels, y2:class labels with bounding box
 
         if X2 is None:
             rpn_accuracy_rpn_monitor.append(0)

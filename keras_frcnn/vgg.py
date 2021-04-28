@@ -106,9 +106,10 @@ def classifier(base_layers, input_rois, num_rois, nb_classes = 21, trainable=Fal
         pooling_regions = 7
         input_shape = (num_rois,512,7,7)
 
+    # perform max pooling on inputs of nonuniform sizes to obtain fixed-size feature maps
     out_roi_pool = RoiPoolingConv(pooling_regions, num_rois)([base_layers, input_rois])
 
-    out = TimeDistributed(Flatten(name='flatten'))(out_roi_pool)
+    out = TimeDistributed(Flatten(name='flatten'))(out_roi_pool) # TimeDistributed: This wrapper allows to apply a layer to every temporal slice of an input.
     out = TimeDistributed(Dense(4096, activation='relu', name='fc1'))(out)
     out = TimeDistributed(Dropout(0.5))(out)
     out = TimeDistributed(Dense(4096, activation='relu', name='fc2'))(out)
