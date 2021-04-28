@@ -20,9 +20,9 @@ Step2. The train_fcnn.py is used to train the model based on the customed datase
 
 
 ## System configuration
-tensorflow-gpu 1.15
-CUDA 10.0
-keras 2.1.5
-python 3.6
-geopandas 0.8.1
+- tensorflow-gpu 1.15
+- CUDA 10.0
+- keras 2.1.5
+- python 3.6
+- geopandas 0.8.1
 
