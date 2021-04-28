@@ -18,3 +18,11 @@ Step2. The train_fcnn.py is used to train the model based on the customed datase
 - data_aggregation.py include script to split the raw image into image patches, these image patches will be used later on as input for model prediction.
 - jobscript: a script to submit jobs on sciclone
 
+
+## System configuration
+tensorflow-gpu 1.15
+CUDA 10.0
+keras 2.1.5
+python 3.6
+geopandas 0.8.1
+
