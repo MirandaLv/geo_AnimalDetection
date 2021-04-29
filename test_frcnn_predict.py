@@ -12,7 +12,8 @@ from keras.layers import Input
 from keras.models import Model
 from keras_frcnn import roi_helpers
 import pandas
-########################### I created 5 list to contain all bounding box coordinates and image name
+###########################
+# created 5 list to contain all bounding box coordinates and image name
 img_name_list = []
 x1_list = []
 x2_list = []
