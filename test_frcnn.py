@@ -15,8 +15,7 @@ from keras.backend.tensorflow_backend import set_session
 from keras_frcnn import roi_helpers
 import pandas as pd
 
-###########################
-# created 5 list to contain all bounding box coordinates and image name
+# get the predicted bounding box to a csv
 img_name_list = []
 x1_list = []
 x2_list = []
@@ -152,7 +151,6 @@ model_classifier = Model([feature_map_input, roi_input], classifier)
 print(f'Loading weights from {C.model_path}')
 model_rpn.load_weights(C.model_path, by_name=True)
 model_classifier.load_weights(C.model_path, by_name=True)
-
 model_rpn.compile(optimizer='sgd', loss='mse')
 model_classifier.compile(optimizer='sgd', loss='mse')
 
@@ -160,7 +158,7 @@ all_imgs = []
 
 classes = {}
 
-bbox_threshold = 0.8
+bbox_threshold = 0.6
 
 visualise = True
 
@@ -270,7 +268,6 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 	
 	cv2.imwrite('./results_imgs-fp-mappen-test/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
 
-################# saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
 df.to_csv("bounding_box_coordinates_ans.csv", sep=',',index=False)
 
