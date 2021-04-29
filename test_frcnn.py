@@ -68,6 +68,7 @@ C.rot_90 = False
 
 
 test_df = pd.read_csv(options.test_path)
+
 img_path = list(set(test_df['image_path'].tolist()))
 
 
