@@ -66,7 +66,10 @@ C.use_horizontal_flips = False
 C.use_vertical_flips = False
 C.rot_90 = False
 
-img_path = options.test_path
+
+test_df = pd.read_csv(options.test_path)
+img_path = list(set(test_df['image_path'].tolist()))
+
 
 def format_img_size(img, C):
 	""" formats the image size based on config """
@@ -167,12 +170,12 @@ bbox_threshold = 0.6
 
 visualise = True
 
-for idx, img_name in enumerate(sorted(os.listdir(img_path))):
+for idx, img_name in enumerate(img_path):
 	if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
 		continue
 	print(img_name)
 	st = time.time()
-	filepath = os.path.join(img_path,img_name)
+	filepath = img_name
 
 	img = cv2.imread(filepath)
 
@@ -271,7 +274,7 @@ for idx, img_name in enumerate(sorted(os.listdir(img_path))):
 	print(all_dets)
 
 	
-	cv2.imwrite('./results_imgs-fp-mappen-test/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
+	cv2.imwrite('./results_imgs-test/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
 
 ################# saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
