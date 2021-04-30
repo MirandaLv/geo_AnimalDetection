@@ -154,6 +154,13 @@ def apply_regr_np(X, T):
 def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
 	# code used from here: http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
 	# if there are no boxes, return an empty list
+
+	# Process explanation:
+	#   Step 1: Sort the probs list
+	#   Step 2: Find the larget prob 'Last' in the list and save it to the pick list
+	#   Step 3: Calculate the IoU with 'Last' box and other boxes in the list. If the IoU is larger than overlap_threshold, delete the box from list
+	#   Step 4: Repeat step 2 and step 3 until there is no item in the probs list
+
 	if len(boxes) == 0:
 		return []
 
