@@ -1,0 +1,13 @@
+img_name,x1,y1,x2,y2
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/192.tif,0,192,96,256
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/128.tif,0,0,112,48
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/354.tif,48,64,160,160
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/354.tif,64,192,176,256
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/41.tif,0,0,96,64
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/498.tif,0,192,128,256
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/90.tif,0,48,112,112
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/463.tif,32,96,176,160
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/365.tif,160,0,240,80
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/465.tif,128,96,240,144
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/114.tif,-16,160,96,240
+/home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/clipped/353.tif,80,96,192,176
