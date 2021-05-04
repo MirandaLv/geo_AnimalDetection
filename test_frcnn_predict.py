@@ -163,7 +163,7 @@ visualise = True
 for idx, img_name in enumerate(sorted(os.listdir(img_path))):
         if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
                 continue
-        print(img_name)
+
         st = time.time()
         filepath = os.path.join(img_path,img_name)
 

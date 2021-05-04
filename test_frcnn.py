@@ -144,10 +144,12 @@ def iou(a, b):
 
 	return float(area_i) / float(area_u + 1e-6)
 
-def get_map(pred, gt, f):
+def get_map(pred, gt, r):
 	T = {}
 	P = {}
-	fx, fy = f
+	# fx, fy = f (fx, fy)
+	fx = r
+	fy = 1
 
 	for bbox in gt:
 		bbox['bbox_matched'] = False
@@ -304,6 +306,7 @@ T = {}
 P = {}
 mAPs = []
 
+
 for idx, img_name in enumerate(img_path):
 	if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
 		continue
@@ -312,8 +315,8 @@ for idx, img_name in enumerate(img_path):
 	filepath = img_name
 
 	img = cv2.imread(filepath)
-
-	X, ratio = format_img(img, C)
+	print(img.shape)
+	X, ratio = format_img(img, C) # ratio=width/height
 
 	if K.common.image_dim_ordering() == 'tf':
 		X = np.transpose(X, (0, 2, 3, 1))
@@ -412,7 +415,8 @@ for idx, img_name in enumerate(img_path):
 	print('Elapsed time = {}'.format(time.time() - st))
 	print(all_dets)
 
-	t, p = get_map(all_dets, img_name['bboxes'], ratio)
+	t, p = get_map(all_dets_extra, img_name['bboxes'], ratio)
+
 	for key in t.keys():
 		if key not in T:
 			T[key] = []
