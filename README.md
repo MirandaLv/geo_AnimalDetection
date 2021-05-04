@@ -43,5 +43,4 @@ The faster_rcnn folder includes all model related scripts, they are called on tr
 - CUDA 10.0
 - keras 2.1.5
 - python 3.6
-- geopandas 0.8.1
 
