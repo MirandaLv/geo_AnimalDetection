@@ -30,21 +30,24 @@ def get_data(input_path):
 					found_bg = True
 				class_mapping[class_name] = len(class_mapping)
 
-			if filename not in all_imgs:
-				all_imgs[filename] = {}
+			name = filename.split("/")[-1] # the filename here is the file directory, to correctly load all ground truth annotations, convert the directory to filename and use it as keys
+			if name not in all_imgs:
+				all_imgs[name] = {}
 				
-				img = cv2.imread(filename)
+				img = cv2.imread(filename) # to correctly read the file, keep the filepath
 				(rows,cols) = img.shape[:2]
-				all_imgs[filename]['filepath'] = filename
-				all_imgs[filename]['width'] = cols
-				all_imgs[filename]['height'] = rows
-				all_imgs[filename]['bboxes'] = []
+				all_imgs[name]['filepath'] = filename
+				all_imgs[name]['width'] = cols
+				all_imgs[name]['height'] = rows
+				all_imgs[name]['bboxes'] = []
+				"""
 				if np.random.randint(0,6) > 0:
-					all_imgs[filename]['imageset'] = 'trainval'
+					all_imgs[name]['imageset'] = 'trainval'
 				else:
-					all_imgs[filename]['imageset'] = 'test'
+					all_imgs[name]['imageset'] = 'test'
+				"""
 
-			all_imgs[filename]['bboxes'].append({'class': class_name, 'x1': int(x1), 'x2': int(x2), 'y1': int(y1), 'y2': int(y2)})
+			all_imgs[name]['bboxes'].append({'class': class_name, 'x1': int(x1), 'x2': int(x2), 'y1': int(y1), 'y2': int(y2)})
 
 
 		all_data = []
