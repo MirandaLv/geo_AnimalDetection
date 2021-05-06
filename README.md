@@ -2,6 +2,12 @@
 
 This post is used to record the process of the animal detection project.
 
+Data preprocessing before Deep Learning:
+- Need to have a list of images with annotations indicating the bounding box of the class in the image and the associated class name
+- Digitize all the animals in the given .tiff file in the raw data folder, and save it as a geojson or shapefile format
+
+Working on Models:
+
 Step1. Data processing and creating the training and validation dataset
 - Create a folder under dataset and name it "processing_data"
 - In the above created folder, create two folders and name them "clipped" and "annotation" respectively.
