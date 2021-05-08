@@ -69,8 +69,9 @@ C.rot_90 = False
 
 
 test_df = pd.read_csv(options.test_path)
+test_df['img_path_local'] = test_df.apply(lambda x: os.path.join("/home/mirandalv/Documents/github/geo_AnimalDetection/dataset/processing_small/clipped", x['image_name']), axis=1)
 
-img_path = list(set(test_df['image_path'].tolist()))
+img_path = list(set(test_df['img_path_local'].tolist()))
 
 
 def format_img_size(img, C):
@@ -310,12 +311,12 @@ mAPs = []
 for idx, img_name in enumerate(img_path):
 	if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
 		continue
-	print(img_name)
+
 	st = time.time()
 	filepath = img_name
 
 	img = cv2.imread(filepath)
-	print(img.shape)
+
 	X, ratio = format_img(img, C) # ratio=width/height
 
 	if K.common.image_dim_ordering() == 'tf':
@@ -379,7 +380,6 @@ for idx, img_name in enumerate(img_path):
 			probs[cls_name].append(np.max(P_cls[0, ii, :]))
 
 	all_dets = []
-	all_dets_extra = []
 
 	for key in bboxes:
 		bbox = np.array(bboxes[key])
@@ -387,9 +387,6 @@ for idx, img_name in enumerate(img_path):
 		new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]), overlap_thresh=0.5)
 		for jk in range(new_boxes.shape[0]):
 			(x1, y1, x2, y2) = new_boxes[jk,:]
-
-			det = {'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2, 'class': key, 'prob': new_probs[jk]}
-			all_dets_extra.append(det)
 
 			(real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
@@ -414,32 +411,8 @@ for idx, img_name in enumerate(img_path):
 	#print(f'Elapsed time = {time.time() - st)}'
 	print('Elapsed time = {}'.format(time.time() - st))
 	print(all_dets)
-
-	t, p = get_map(all_dets_extra, img_name['bboxes'], ratio)
-
-	for key in t.keys():
-		if key not in T:
-			T[key] = []
-			P[key] = []
-		T[key].extend(t[key])
-		P[key].extend(p[key])
-	all_aps = []
-	for key in T.keys():
-		ap = average_precision_score(T[key], P[key])
-		print('{} AP: {}'.format(key, ap))
-		all_aps.append(ap)
-	print('mAP = {}'.format(np.mean(np.array(all_aps))))
-	mAPs.append(np.mean(np.array(all_aps)))
-
 	
-	cv2.imwrite('./results_imgs-test/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
-
-print()
-print('mean average precision:', np.mean(np.array(mAPs)))
-
-mAP = [mAP for mAP in mAPs if str(mAP)!='nan']
-mean_average_prec = round(np.mean(np.array(mAP)), 3)
-print('After training %dk batches, the mean average precision is %0.3f'%(len(range(100)), mean_average_prec))
+	cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
 
 
 ################# saving the results(bounding boxes) in a csv
