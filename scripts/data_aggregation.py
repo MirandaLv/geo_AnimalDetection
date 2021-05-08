@@ -45,7 +45,7 @@ for corner in corners:
     fpath = os.path.join(os.path.abspath("."), fname)
     window = rasterio.windows.Window(r, c, dim, dim)
 
-#window = rasterio.windows.Window(r, c, dim, dim)
+# window = rasterio.windows.Window(r, c, dim, dim)
 
     out_meta = img_raw.meta
     out_meta.update({
