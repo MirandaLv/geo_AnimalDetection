@@ -62,7 +62,7 @@ def get_map(pred, gt, f):
 		T[pred_class].append(int(found_match))
 
 	for gt_box in gt:
-		if not gt_box['bbox_matched'] and not gt_box['difficult']:
+		if not gt_box['bbox_matched']: # and not gt_box['difficult']:
 			if gt_box['class'] not in P:
 				P[gt_box['class']] = []
 				T[gt_box['class']] = []
@@ -144,7 +144,7 @@ class_mapping = C.class_mapping
 if 'bg' not in class_mapping:
 	class_mapping['bg'] = len(class_mapping)
 
-class_mapping = {v: k for k, v in class_mapping.iteritems()}
+class_mapping = {v: k for k, v in class_mapping.items()}
 print(class_mapping)
 class_to_color = {class_mapping[v]: np.random.randint(0, 255, 3) for v in class_mapping}
 C.num_rois = int(options.num_rois)
@@ -227,7 +227,7 @@ for idx, img_data in enumerate(all_imgs):
 			ROIs_padded[0, curr_shape[1]:, :] = ROIs[0, 0, :]
 			ROIs = ROIs_padded
 
-		[P_cls, P_regr] = model_classifier_only.predict([F, ROIs])
+		[P_cls, P_regr] = model_classifier.predict([F, ROIs])
 
 		for ii in range(P_cls.shape[1]):
 
