@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 def get_data(input_path):
 	found_bg = False
@@ -10,6 +11,9 @@ def get_data(input_path):
 	class_mapping = {}
 
 	visualise = True
+
+	basepath = os.path.dirname(input_path)
+	image_basepath = os.path.join(basepath, 'clipped')
 	
 	with open(input_path,'r') as f:
 
@@ -33,7 +37,9 @@ def get_data(input_path):
 			name = filename.split("/")[-1] # the filename here is the file directory, to correctly load all ground truth annotations, convert the directory to filename and use it as keys
 			if name not in all_imgs:
 				all_imgs[name] = {}
-				
+				filename = os.path.join(image_basepath, name)
+				print(filename)
+
 				img = cv2.imread(filename) # to correctly read the file, keep the filepath
 				(rows,cols) = img.shape[:2]
 				all_imgs[name]['filepath'] = filename
