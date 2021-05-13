@@ -32,7 +32,6 @@ Step 5. Running on cdsw using GPUs
 
 Step 6. Model validation (on-going)
 
-Step 7. Prediction from raw image (on-going)
 
 
 ## Script description
