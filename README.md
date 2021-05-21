@@ -1,4 +1,4 @@
-# geo_AnimalDetection
+u# geo_AnimalDetection
 
 This post is used to record the process of the animal detection project.
 
@@ -43,7 +43,7 @@ Step 6. Model validation (on-going)
 ### Model processing
 The faster_rcnn folder includes all model related scripts, they are called on training and validation process
 
-## System configuration
+## Requirements
 - tensorflow-gpu 1.15
 - CUDA 10.0
 - keras 2.1.5
