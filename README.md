@@ -1,4 +1,4 @@
-u# geo_AnimalDetection
+# geo_AnimalDetection
 
 This post is used to record the process of the animal detection project.
 
