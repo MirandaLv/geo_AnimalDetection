@@ -15,6 +15,7 @@ from keras.backend.tensorflow_backend import set_session
 from keras_frcnn import roi_helpers
 import pandas as pd
 from sklearn.metrics import average_precision_score
+from keras_frcnn import data_generators
 
 """
 python3 test_frcnn_predict.py -p /home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_small/test_annotation.txt
@@ -183,7 +184,8 @@ def get_map(pred, gt, r):
 				continue
 			if gt_seen:
 				continue
-			iou_map = iou((pred_x1, pred_y1, pred_x2, pred_y2), (gt_x1, gt_y1, gt_x2, gt_y2))
+			iou_map = data_generators.iou((pred_x1, pred_y1, pred_x2, pred_y2), (gt_x1, gt_y1, gt_x2, gt_y2))
+
 			if iou_map >= 0.5:
 				found_match = True
 				gt_box['bbox_matched'] = True
@@ -323,7 +325,6 @@ for idx, img_name in enumerate(img_path):
 
 	# get the feature maps and output from the RPN
 	[Y1, Y2, F] = model_rpn.predict(X)
-	
 
 	R = roi_helpers.rpn_to_roi(Y1, Y2, C, K.common.image_dim_ordering(), overlap_thresh=0.7)
 
@@ -354,6 +355,7 @@ for idx, img_name in enumerate(img_path):
 		# Calculate bboxes coordinates on resized image
 		for ii in range(P_cls.shape[1]):
 			# Ignore 'bg' class
+
 			if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1):
 				continue
 
@@ -407,12 +409,27 @@ for idx, img_name in enumerate(img_path):
 			cv2.rectangle(img, (textOrg[0] - 5,textOrg[1]+baseLine - 5), (textOrg[0]+retval[0] + 5, textOrg[1]-retval[1] - 5), (255, 255, 255), -1)
 			cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
 
-	#print(f'Elapsed time = {time.time() - st)}'
-	print('Elapsed time = {}'.format(time.time() - st))
-	print(all_dets)
-	
-	cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
-
+	# #print(f'Elapsed time = {time.time() - st)}'
+	# print('Elapsed time = {}'.format(time.time() - st))
+	# print(all_dets)
+	#
+	# cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
+	#
+	# # Get mAPs
+	# print('Elapsed time = {}'.format(time.time() - st))
+	# t, p = get_map(all_dets, img_name['bboxes'], (fx, fy))
+	# for key in t.keys():
+	# 	if key not in T:
+	# 		T[key] = []
+	# 		P[key] = []
+	# 	T[key].extend(t[key])
+	# 	P[key].extend(p[key])
+	# all_aps = []
+	# for key in T.keys():
+	# 	ap = average_precision_score(T[key], P[key])
+	# 	print('{} AP: {}'.format(key, ap))
+	# 	all_aps.append(ap)
+	# print('mAP = {}'.format(np.mean(np.array(all_aps))))
 
 ################# saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})

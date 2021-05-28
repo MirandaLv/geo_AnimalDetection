@@ -13,6 +13,7 @@ from keras.models import Model
 from keras_frcnn import roi_helpers
 from keras_frcnn import data_generators
 from sklearn.metrics import average_precision_score
+import pandas as pd
 
 
 def get_map(pred, gt, f):
@@ -74,6 +75,7 @@ def get_map(pred, gt, f):
 	#pdb.set_trace()
 	return T, P
 
+
 sys.setrecursionlimit(40000)
 
 parser = OptionParser()
@@ -85,7 +87,7 @@ parser.add_option("--config_filename", dest="config_filename", help=
 				"Location to read the metadata related to the training (generated when training).",
 				default="config.pickle")
 parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of simple or pascal_voc",
-				default="pascal_voc"),
+				default="pascal_voc")
 
 (options, args) = parser.parse_args()
 
@@ -182,12 +184,14 @@ model_rpn.compile(optimizer='sgd', loss='mse')
 model_classifier.compile(optimizer='sgd', loss='mse')
 
 all_imgs, _, _ = get_data(options.test_path)
-#test_imgs = [s for s in all_imgs if s['imageset'] == 'test']
 
 print(all_imgs)
 
 T = {}
 P = {}
+mAPs = []
+imgout = []
+
 for idx, img_data in enumerate(all_imgs):
 	print('{}/{}'.format(idx,len(all_imgs)))
 	st = time.time()
@@ -281,5 +285,18 @@ for idx, img_data in enumerate(all_imgs):
 		print('{} AP: {}'.format(key, ap))
 		all_aps.append(ap)
 	print('mAP = {}'.format(np.mean(np.array(all_aps))))
+
+	# exporting the mAP as a file
+	imgout.append(filepath)
+	mAPs.append(np.mean(np.array(all_aps)))
+
+	df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
+
+	outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
+	df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
+
 	#print(T)
 	#print(P)
+
+
+
