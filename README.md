@@ -32,7 +32,6 @@ Step 5. Running on cdsw using GPUs
 
 Step 6. Model validation (on-going)
 
-Step 7. Prediction from raw image (on-going)
 
 
 ## Script description
@@ -44,7 +43,7 @@ Step 7. Prediction from raw image (on-going)
 ### Model processing
 The faster_rcnn folder includes all model related scripts, they are called on training and validation process
 
-## System configuration
+## Requirements
 - tensorflow-gpu 1.15
 - CUDA 10.0
 - keras 2.1.5
