@@ -252,6 +252,7 @@ config_output_filename = options.config_filename
 
 with open(config_output_filename, 'rb') as f_in:
     C = pickle.load(f_in)
+    print(C)
 
 if C.network == 'resnet50':
     import keras_frcnn.resnet as nn

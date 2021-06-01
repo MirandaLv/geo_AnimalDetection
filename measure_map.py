@@ -106,6 +106,7 @@ config_output_filename = options.config_filename
 
 with open(config_output_filename, 'rb') as f_in:
 	C = pickle.load(f_in)
+	print(C)
 
 # turn off any data augmentation at test time
 C.use_horizontal_flips = False
@@ -276,7 +277,7 @@ for idx, img_data in enumerate(all_imgs):
 
 	print("the get_map t is", t)
 	print("the get_map p is", p)
-	
+
 	for key in t.keys():
 		if key not in T:
 			T[key] = []
