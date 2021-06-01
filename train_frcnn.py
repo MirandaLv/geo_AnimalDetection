@@ -36,7 +36,7 @@ sys.setrecursionlimit(40000)
 
 """
 
-python3 train_frcnn.py -o simple -p /home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_data/train_annotation.txt --num_epochs 500 --input_weight_path /home/cdsw/geo_Animal/geo_AnimalDetection/weights/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5 --output_weight_path model_frcnn_256_vgg.hdf5 --hf True --vf True --rot True
+python3 train_frcnn.py -o simple -p /home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_small/train_annotation.txt --num_epochs 1000 --input_weight_path /home/cdsw/geo_Animal/geo_AnimalDetection/weights/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5 --output_weight_path model_frcnn_64_resnet50.hdf5 --hf True --vf True --rot True --network resnet50
 
 """
 
