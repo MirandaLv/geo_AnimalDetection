@@ -129,16 +129,16 @@ def get_map(pred, gt, r):
 
         for gt_box in gt:
             gt_class = gt_box['class']
-            gt_x1 = gt_box['x1'] / fx
-            gt_x2 = gt_box['x2'] / fx
-            gt_y1 = gt_box['y1'] / fy
-            gt_y2 = gt_box['y2'] / fy
+            gt_x1 = gt_box['x1']/fx
+            gt_x2 = gt_box['x2']/fx
+            gt_y1 = gt_box['y1']/fy
+            gt_y2 = gt_box['y2']/fy
             gt_seen = gt_box['bbox_matched']
             if gt_class != pred_class:
                 continue
             if gt_seen:
                 continue
-            iou_map = data_generators.iou((pred_x1, pred_y1, pred_x2, pred_y2), (gt_x1, gt_y1, gt_x2, gt_y2))
+            iou_map = iou((pred_x1, pred_y1, pred_x2, pred_y2), (gt_x1, gt_y1, gt_x2, gt_y2))
 
             if iou_map >= 0.5:
                 found_match = True
