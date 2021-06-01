@@ -272,7 +272,8 @@ for idx, img_data in enumerate(all_imgs):
 			all_dets.append(det)
 
 	print('ground truth box', img_data['bboxes'])
-
+	print(fx)
+	print(fy)
 	print('Elapsed time = {}'.format(time.time() - st))
 	t, p = get_map(all_dets, img_data['bboxes'], (fx, fy))
 
