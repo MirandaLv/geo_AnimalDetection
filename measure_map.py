@@ -273,6 +273,10 @@ for idx, img_data in enumerate(all_imgs):
 
 	print('Elapsed time = {}'.format(time.time() - st))
 	t, p = get_map(all_dets, img_data['bboxes'], (fx, fy))
+
+	print("the get_map t is", t)
+	print("the get_map p is", p)
+	
 	for key in t.keys():
 		if key not in T:
 			T[key] = []
