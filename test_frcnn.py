@@ -451,6 +451,8 @@ for idx, img_name in enumerate(all_imgs):
     # Start calculating mAPs for each image
 
     t, p = get_map(all_dets, img_name['bboxes'], ratio)
+    print("the get_map t is", t)
+    print("the get_map p is", p)
     for key in t.keys():
         if key not in T:
             T[key] = []
