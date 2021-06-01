@@ -429,27 +429,28 @@ for idx, img_name in enumerate(all_imgs):
             y1_list.append(real_y1)
             y2_list.append(real_y2)
 
-            cv2.rectangle(img, (real_x1, real_y1), (real_x2, real_y2),
-                          (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])), 2)
-
-            textLabel = f'{key}: {int(100 * new_probs[jk])}'
-            # all_dets.append((key, 100 * new_probs[jk]))
-
             det = {'x1': real_x1, 'x2': real_x2, 'y1': real_y1, 'y2': real_y2, 'class': key, 'prob': new_probs[jk]}
             all_dets.append(det)
-
-            (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
-            textOrg = (real_x1, real_y1 - 0)
-
-            cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                          (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0), 2)
-            cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                          (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
-            cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
-
-    # save output into a folder
-    get_filename = os.path.splitext(os.path.basename(img_name['filepath']))[0]
-    cv2.imwrite('./results_imgs/{}.png'.format(get_filename),img)
+    #
+    #         cv2.rectangle(img, (real_x1, real_y1), (real_x2, real_y2),
+    #                       (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])), 2)
+    #
+    #         textLabel = f'{key}: {int(100 * new_probs[jk])}'
+    #         # all_dets.append((key, 100 * new_probs[jk]))
+    #
+    #
+    #         (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+    #         textOrg = (real_x1, real_y1 - 0)
+    #
+    #         cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
+    #                       (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0), 2)
+    #         cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
+    #                       (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
+    #         cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
+    #
+    # # save output into a folder
+    # get_filename = os.path.splitext(os.path.basename(img_name['filepath']))[0]
+    # cv2.imwrite('./results_imgs/{}.png'.format(get_filename),img)
 
     print('Elapsed time = {}'.format(time.time() - st))
 
