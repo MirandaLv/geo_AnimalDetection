@@ -106,6 +106,8 @@ def get_map(pred, gt, r):
     # fx, fy = f (fx, fy)
     fx = r
     fy = 1
+    print(fx)
+    print(fy)
 
     for bbox in gt:
         bbox['bbox_matched'] = False
