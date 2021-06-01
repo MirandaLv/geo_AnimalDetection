@@ -17,61 +17,11 @@ import pandas as pd
 from sklearn.metrics import average_precision_score
 from keras_frcnn import data_generators
 
+
 """
 python3 test_frcnn_predict.py -p /home/cdsw/geo_Animal/geo_AnimalDetection/dataset/processing_small/test_annotation.txt
 """
 
-########################### I created 5 list to contain all bounding box coordinates and image name
-img_name_list = []
-x1_list = []
-x2_list = []
-y1_list = []
-y2_list = []
-
-sys.setrecursionlimit(40000)
-
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-config.log_device_placement = True
-sess = tf.Session(config=config)
-set_session(sess)
-
-parser = OptionParser()
-
-parser.add_option("-p", "--path", dest="test_path", help="Path to test data.")
-parser.add_option("-n", "--num_rois", type="int", dest="num_rois",
-                  help="Number of ROIs per iteration. Higher means more memory use.", default=32)
-parser.add_option("--config_filename", dest="config_filename", help=
-"Location to read the metadata related to the training (generated when training).",
-                  default="config.pickle")
-parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.",
-                  default='resnet50')
-
-(options, args) = parser.parse_args()
-
-if not options.test_path:  # if filename is not given
-    parser.error('Error: path to test data must be specified. Pass --path to command line')
-
-config_output_filename = options.config_filename
-
-with open(config_output_filename, 'rb') as f_in:
-    C = pickle.load(f_in)
-
-if C.network == 'resnet50':
-    import keras_frcnn.resnet as nn
-elif C.network == 'vgg':
-    import keras_frcnn.vgg as nn
-
-# turn off any data augmentation at test time
-C.use_horizontal_flips = False
-C.use_vertical_flips = False
-C.rot_90 = False
-
-test_df = pd.read_csv(options.test_path)
-# test_df['img_path_local'] = test_df.apply(lambda x: os.path.join("/home/mirandalv/Documents/github/geo_AnimalDetection/dataset/processing_small/clipped", x['image_name']), axis=1)
-# img_path = list(set(test_df['img_path_local'].tolist()))
-
-img_path = list(set(test_df['image_path'].tolist()))
 
 
 def format_img_size(img, C):
@@ -255,6 +205,72 @@ def format_img_map(img, C):
     return img, fx, fy
 
 
+
+# Created 5 list to contain all bounding box coordinates and image name
+img_name_list = []
+x1_list = []
+x2_list = []
+y1_list = []
+y2_list = []
+
+sys.setrecursionlimit(40000)
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+config.log_device_placement = True
+sess = tf.Session(config=config)
+set_session(sess)
+
+parser = OptionParser()
+
+parser.add_option("-p", "--path", dest="test_path", help="Path to test data.")
+parser.add_option("-n", "--num_rois", type="int", dest="num_rois",
+                  help="Number of ROIs per iteration. Higher means more memory use.", default=32)
+parser.add_option("--config_filename", dest="config_filename", help="Location to read the metadata related to the training (generated when training).",
+                  default="config.pickle")
+parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.",
+                  default='resnet50')
+parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of simple or pascal_voc",
+                  default="pascal_voc")
+
+(options, args) = parser.parse_args()
+
+
+if not options.test_path:  # if filename is not given
+    parser.error('Error: path to test data must be specified. Pass --path to command line')
+
+# add the data parsing format
+if options.parser == 'pascal_voc':
+    from keras_frcnn.pascal_voc_parser import get_data
+elif options.parser == 'simple':
+    from keras_frcnn.simple_parser import get_data
+else:
+    raise ValueError("Command line option parser must be one of 'pascal_voc' or 'simple'")
+
+
+config_output_filename = options.config_filename
+
+with open(config_output_filename, 'rb') as f_in:
+    C = pickle.load(f_in)
+
+if C.network == 'resnet50':
+    import keras_frcnn.resnet as nn
+elif C.network == 'vgg':
+    import keras_frcnn.vgg as nn
+
+# turn off any data augmentation at test time
+C.use_horizontal_flips = False
+C.use_vertical_flips = False
+C.rot_90 = False
+#
+# test_df = pd.read_csv(options.test_path)
+#
+# # test_df['img_path_local'] = test_df.apply(lambda x: os.path.join("/home/mirandalv/Documents/github/geo_AnimalDetection/dataset/processing_small/clipped", x['image_name']), axis=1)
+# # img_path = list(set(test_df['img_path_local'].tolist()))
+#
+# img_path = list(set(test_df['image_path'].tolist()))
+
+
 class_mapping = C.class_mapping
 
 if 'bg' not in class_mapping:
@@ -312,13 +328,19 @@ visualise = True
 T = {}
 P = {}
 mAPs = []
+imgout = []
 
-for idx, img_name in enumerate(img_path):
-    if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
+
+all_imgs, _, _ = get_data(options.test_path)
+
+
+
+for idx, img_name in enumerate(all_imgs):
+    if not img_name['filepath'].lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
         continue
 
     st = time.time()
-    filepath = img_name
+    filepath = img_name['filepath']
 
     img = cv2.imread(filepath)
 
@@ -396,7 +418,7 @@ for idx, img_name in enumerate(img_path):
 
             (real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
-            img_name_list.append(img_name)
+            img_name_list.append(img_name['filepath'])
             x1_list.append(real_x1)
             x2_list.append(real_x2)
             y1_list.append(real_y1)
@@ -406,7 +428,10 @@ for idx, img_name in enumerate(img_path):
                           (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])), 2)
 
             textLabel = f'{key}: {int(100 * new_probs[jk])}'
-            all_dets.append((key, 100 * new_probs[jk]))
+            # all_dets.append((key, 100 * new_probs[jk]))
+
+            det = {'x1': real_x1, 'x2': real_x2, 'y1': real_y1, 'y2': real_y2, 'class': key, 'prob': new_probs[jk]}
+            all_dets.append(det)
 
             (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
             textOrg = (real_x1, real_y1 - 0)
@@ -417,29 +442,38 @@ for idx, img_name in enumerate(img_path):
                           (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
             cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
 
-# #print(f'Elapsed time = {time.time() - st)}'
-# print('Elapsed time = {}'.format(time.time() - st))
-# print(all_dets)
-#
-# cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
-#
-# # Get mAPs
-# print('Elapsed time = {}'.format(time.time() - st))
-# t, p = get_map(all_dets, img_name['bboxes'], (fx, fy))
-# for key in t.keys():
-# 	if key not in T:
-# 		T[key] = []
-# 		P[key] = []
-# 	T[key].extend(t[key])
-# 	P[key].extend(p[key])
-# all_aps = []
-# for key in T.keys():
-# 	ap = average_precision_score(T[key], P[key])
-# 	print('{} AP: {}'.format(key, ap))
-# 	all_aps.append(ap)
-# print('mAP = {}'.format(np.mean(np.array(all_aps))))
+    # save output into a folder
+    get_filename = os.path.splitext(os.path.basename(img_name['filepath']))[0]
+    cv2.imwrite('./results_imgs/{}.png'.format(get_filename),img)
 
-################# saving the results(bounding boxes) in a csv
+    print('Elapsed time = {}'.format(time.time() - st))
+
+    # Start calculating mAPs for each image
+
+    t, p = get_map(all_dets, img_name['bboxes'], ratio)
+    for key in t.keys():
+        if key not in T:
+            T[key] = []
+            P[key] = []
+        T[key].extend(t[key])
+        P[key].extend(p[key])
+    all_aps = []
+    for key in T.keys():
+        ap = average_precision_score(T[key], P[key])
+        print('{} AP: {}'.format(key, ap))
+        all_aps.append(ap)
+    print('mAP = {}'.format(np.mean(np.array(all_aps))))
+
+    # exporting the mAP as a file
+    imgout.append(filepath)
+    mAPs.append(np.mean(np.array(all_aps)))
+
+    df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
+
+    outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
+    df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
+
+# saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
 df.to_csv("bounding_box_coordinates_ans64pred.csv", sep=',', index=False)
 
