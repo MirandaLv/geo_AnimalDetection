@@ -208,6 +208,8 @@ def format_img_map(img, C):
 
 
 
+
+
 # Created 5 list to contain all bounding box coordinates and image name
 img_name_list = []
 x1_list = []
