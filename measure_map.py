@@ -271,6 +271,7 @@ for idx, img_data in enumerate(all_imgs):
 			det = {'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2, 'class': key, 'prob': new_probs[jk]}
 			all_dets.append(det)
 
+	print('ground truth box', img_data['bboxes'])
 
 	print('Elapsed time = {}'.format(time.time() - st))
 	t, p = get_map(all_dets, img_data['bboxes'], (fx, fy))
