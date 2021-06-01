@@ -383,7 +383,7 @@ for idx, img_name in enumerate(all_imgs):
         for ii in range(P_cls.shape[1]):
             # Ignore 'bg' class
 
-            if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1):
+            if np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1): #np.max(P_cls[0, ii, :]) < bbox_threshold or
                 continue
 
             cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
