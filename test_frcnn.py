@@ -105,7 +105,7 @@ def get_map(pred, gt, r):
     P = {}
     # fx, fy = f (fx, fy)
     fx = r
-    fy = 1
+    fy = 1.0
     print(fx)
     print(fy)
 
@@ -234,8 +234,8 @@ parser.add_option("--config_filename", dest="config_filename", help="Location to
                   default="config.pickle")
 parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.",
                   default='resnet50')
-parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of simple or pascal_voc",
-                  default="pascal_voc")
+# parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of simple or pascal_voc",
+#                   default="pascal_voc")
 
 (options, args) = parser.parse_args()
 
@@ -243,14 +243,14 @@ parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of s
 if not options.test_path:  # if filename is not given
     parser.error('Error: path to test data must be specified. Pass --path to command line')
 
-# add the data parsing format
-if options.parser == 'pascal_voc':
-    from keras_frcnn.pascal_voc_parser import get_data
-elif options.parser == 'simple':
-    from keras_frcnn.simple_parser import get_data
-else:
-    raise ValueError("Command line option parser must be one of 'pascal_voc' or 'simple'")
-
+# # add the data parsing format
+# if options.parser == 'pascal_voc':
+#     from keras_frcnn.pascal_voc_parser import get_data
+# elif options.parser == 'simple':
+#     from keras_frcnn.simple_parser import get_data
+# else:
+#     raise ValueError("Command line option parser must be one of 'pascal_voc' or 'simple'")
+#
 
 config_output_filename = options.config_filename
 
@@ -267,13 +267,13 @@ elif C.network == 'vgg':
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
 C.rot_90 = False
-#
-# test_df = pd.read_csv(options.test_path)
-#
-# # test_df['img_path_local'] = test_df.apply(lambda x: os.path.join("/home/mirandalv/Documents/github/geo_AnimalDetection/dataset/processing_small/clipped", x['image_name']), axis=1)
-# # img_path = list(set(test_df['img_path_local'].tolist()))
-#
-# img_path = list(set(test_df['image_path'].tolist()))
+
+test_df = pd.read_csv(options.test_path)
+
+# test_df['img_path_local'] = test_df.apply(lambda x: os.path.join("/home/mirandalv/Documents/github/geo_AnimalDetection/dataset/processing_small/clipped", x['image_name']), axis=1)
+# img_path = list(set(test_df['img_path_local'].tolist()))
+
+img_path = list(set(test_df['image_path'].tolist()))
 
 
 class_mapping = C.class_mapping
@@ -335,17 +335,17 @@ P = {}
 mAPs = []
 imgout = []
 
+#
+# all_imgs, _, _ = get_data(options.test_path)
 
-all_imgs, _, _ = get_data(options.test_path)
 
-
-for idx, img_name in enumerate(all_imgs):
-    if not img_name['filepath'].lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
+for idx, img_name in enumerate(img_path):
+    if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
         continue
 
-    print('{}/{}'.format(idx, len(all_imgs)))
+    print('{}/{}'.format(idx, len(img_path)))
     st = time.time()
-    filepath = img_name['filepath']
+    filepath = img_name
 
     img = cv2.imread(filepath)
 
@@ -423,7 +423,7 @@ for idx, img_name in enumerate(all_imgs):
 
             (real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
-            img_name_list.append(img_name['filepath'])
+            img_name_list.append(img_name)
             x1_list.append(x1)
             x2_list.append(x2)
             y1_list.append(y1)
@@ -454,35 +454,35 @@ for idx, img_name in enumerate(all_imgs):
 
     print('Elapsed time = {}'.format(time.time() - st))
 
-    # Start calculating mAPs for each image
-
-    t, p = get_map(all_dets, img_name['bboxes'], ratio)
-
-    print('ground truth box', img_name['bboxes'])
-    print("the get_map t is", t)
-    print("the get_map p is", p)
-    for key in t.keys():
-        if key not in T:
-            T[key] = []
-            P[key] = []
-        T[key].extend(t[key])
-        P[key].extend(p[key])
-    all_aps = []
-    for key in T.keys():
-        ap = average_precision_score(T[key], P[key])
-        print('{} AP: {}'.format(key, ap))
-        all_aps.append(ap)
-    print('mAP = {}'.format(np.mean(np.array(all_aps))))
-
-    # exporting the mAP as a file
-    imgout.append(filepath)
-    mAPs.append(np.mean(np.array(all_aps)))
-
-
-df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
-
-outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
-df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
+#     # Start calculating mAPs for each image
+#
+#     t, p = get_map(all_dets, img_name['bboxes'], ratio)
+#
+#     print('ground truth box', img_name['bboxes'])
+#     print("the get_map t is", t)
+#     print("the get_map p is", p)
+#     for key in t.keys():
+#         if key not in T:
+#             T[key] = []
+#             P[key] = []
+#         T[key].extend(t[key])
+#         P[key].extend(p[key])
+#     all_aps = []
+#     for key in T.keys():
+#         ap = average_precision_score(T[key], P[key])
+#         print('{} AP: {}'.format(key, ap))
+#         all_aps.append(ap)
+#     print('mAP = {}'.format(np.mean(np.array(all_aps))))
+#
+#     # exporting the mAP as a file
+#     imgout.append(filepath)
+#     mAPs.append(np.mean(np.array(all_aps)))
+#
+#
+# df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
+#
+# outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
+# df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
 
 # saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
