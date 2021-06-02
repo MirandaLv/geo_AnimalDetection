@@ -57,5 +57,5 @@ class Config:
 		# https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5
 
 		# self.model_path = 'model_frcnn.vgg.hdf5'
-		self.model_path = 'model_frcnn_64_{}.hdf5'.format(self.network)
+		self.model_path = 'model_frcnn.{}.hdf5'.format(self.network)
 		#self.record_path = None

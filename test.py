@@ -415,11 +415,8 @@ for idx, img_name in enumerate(img_path):
                           (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
             cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
 
-# #print(f'Elapsed time = {time.time() - st)}'
-# print('Elapsed time = {}'.format(time.time() - st))
-# print(all_dets)
-#
-# cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
+
+    cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
 #
 # # Get mAPs
 # print('Elapsed time = {}'.format(time.time() - st))
