@@ -297,13 +297,12 @@ for idx, img_data in enumerate(all_imgs):
 	imgout.append(filepath)
 	mAPs.append(np.mean(np.array(all_aps)))
 
-	df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
+df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
 
-	outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
-	df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
+outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
+df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
 
-	#print(T)
-	#print(P)
+
 
 
 
