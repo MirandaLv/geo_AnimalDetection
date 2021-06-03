@@ -71,8 +71,12 @@ test_df = pd.read_csv(options.test_path)
 # test_df['img_path_local'] = test_df.apply(lambda x: os.path.join("/home/mirandalv/Documents/github/geo_AnimalDetection/dataset/processing_small/clipped", x['image_name']), axis=1)
 # img_path = list(set(test_df['img_path_local'].tolist()))
 
-img_path = list(set(test_df['image_path'].tolist()))
+img_paths = list(set(test_df['image_path'].tolist()))
 
+basepath = os.path.dirname(options.test_path)
+image_basepath = os.path.join(basepath, 'clipped')
+
+new_img_paths= [os.path.join(image_basepath, os.path.basename(img_path)) for img_path in img_paths]
 
 def format_img_size(img, C):
     """ formats the image size based on config """
@@ -311,10 +315,11 @@ T = {}
 P = {}
 mAPs = []
 
-for idx, img_name in enumerate(img_path):
+for idx, img_name in enumerate(new_img_paths):
     if not img_name.lower().endswith(('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff')):
         continue
 
+    print('{}/{}'.format(idx, len(new_img_paths)))
     st = time.time()
     filepath = img_name
 

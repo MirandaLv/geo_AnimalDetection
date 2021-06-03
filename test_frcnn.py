@@ -381,13 +381,13 @@ for idx, img_name in enumerate(img_path):
             ROIs_padded[0, curr_shape[1]:, :] = ROIs[0, 0, :]
             ROIs = ROIs_padded
 
-        [P_cls, P_regr] = model_classifier_only.predict([F, ROIs])
+        [P_cls, P_regr] = model_classifier.predict([F, ROIs])
 
         # Calculate bboxes coordinates on resized image
         for ii in range(P_cls.shape[1]):
             # Ignore 'bg' class
 
-            if np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1): #np.max(P_cls[0, ii, :]) < bbox_threshold or
+            if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1):
                 continue
 
             cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
