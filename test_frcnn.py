@@ -424,10 +424,10 @@ for idx, img_name in enumerate(img_path):
             (real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
             img_name_list.append(img_name)
-            x1_list.append(x1)
-            x2_list.append(x2)
-            y1_list.append(y1)
-            y2_list.append(y2)
+            x1_list.append(real_x1)
+            x2_list.append(real_x2)
+            y1_list.append(real_y1)
+            y2_list.append(real_y2)
 
             det = {'x1': real_x1, 'x2': real_x2, 'y1': real_y1, 'y2': real_y2, 'class': key, 'prob': new_probs[jk]}
             all_dets.append(det)
