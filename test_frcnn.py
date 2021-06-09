@@ -356,7 +356,7 @@ df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
 
 ################# saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
-df.to_csv("bounding_box_coordinates_measure.csv", sep=',', index=False)
+df.to_csv("bounding_box_coordinates.csv", sep=',', index=False)
 
 
 
