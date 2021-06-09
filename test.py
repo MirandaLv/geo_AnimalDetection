@@ -154,12 +154,10 @@ def iou(a, b):
     return float(area_i) / float(area_u + 1e-6)
 
 
-def get_map(pred, gt, r):
+def get_map(pred, gt, f):
     T = {}
     P = {}
-    # fx, fy = f (fx, fy)
-    fx = r
-    fy = 1
+    fx, fy = f
 
     for bbox in gt:
         bbox['bbox_matched'] = False
@@ -422,22 +420,27 @@ for idx, img_name in enumerate(new_img_paths):
 
 
     cv2.imwrite('./results_imgs/{}.png'.format(os.path.splitext(str(img_name))[0]),img)
-#
-# # Get mAPs
-# print('Elapsed time = {}'.format(time.time() - st))
-# t, p = get_map(all_dets, img_name['bboxes'], (fx, fy))
-# for key in t.keys():
-# 	if key not in T:
-# 		T[key] = []
-# 		P[key] = []
-# 	T[key].extend(t[key])
-# 	P[key].extend(p[key])
-# all_aps = []
-# for key in T.keys():
-# 	ap = average_precision_score(T[key], P[key])
-# 	print('{} AP: {}'.format(key, ap))
-# 	all_aps.append(ap)
-# print('mAP = {}'.format(np.mean(np.array(all_aps))))
+
+    # Get mAPs
+    print('Elapsed time = {}'.format(time.time() - st))
+
+    (height, width, _) = img.shape
+    fx = width/C.im_size
+    fy = height/C.im_size
+
+    t, p = get_map(all_dets, img_name['bboxes'], (fx, fy))
+    for key in t.keys():
+        if key not in T:
+            T[key] = []
+            P[key] = []
+        T[key].extend(t[key])
+        P[key].extend(p[key])
+    all_aps = []
+    for key in T.keys():
+        ap = average_precision_score(T[key], P[key])
+        print('{} AP: {}'.format(key, ap))
+        all_aps.append(ap)
+    print('mAP = {}'.format(np.mean(np.array(all_aps))))
 
 ################# saving the results(bounding boxes) in a csv
 df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})

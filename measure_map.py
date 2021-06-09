@@ -6,7 +6,7 @@ import pickle
 from optparse import OptionParser
 import time
 from keras_frcnn import config
-import keras_frcnn.resnet as nn
+# import keras_frcnn.resnet as nn
 from keras import backend as K
 from keras.layers import Input
 from keras.models import Model
@@ -76,6 +76,43 @@ def get_map(pred, gt, f):
 	return T, P
 
 
+# Method to transform the coordinates of the bounding box to its original size
+def get_real_coordinates(ratio, x1, y1, x2, y2):
+	real_x1 = int(round(x1 // ratio))
+	real_y1 = int(round(y1 // ratio))
+	real_x2 = int(round(x2 // ratio))
+	real_y2 = int(round(y2 // ratio))
+
+	return (real_x1, real_y1, real_x2, real_y2)
+
+
+
+def format_img(img, C):
+	img_min_side = float(C.im_size)
+	(height, width, _) = img.shape
+
+	if width <= height:
+		f = img_min_side / width
+		new_height = int(f * height)
+		new_width = int(img_min_side)
+	else:
+		f = img_min_side / height
+		new_width = int(f * width)
+		new_height = int(img_min_side)
+	fx = width / float(new_width)
+	fy = height / float(new_height)
+	img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
+	img = img[:, :, (2, 1, 0)]
+	img = img.astype(np.float32)
+	img[:, :, 0] -= C.img_channel_mean[0]
+	img[:, :, 1] -= C.img_channel_mean[1]
+	img[:, :, 2] -= C.img_channel_mean[2]
+	img /= C.img_scaling_factor
+	img = np.transpose(img, (2, 0, 1))
+	img = np.expand_dims(img, axis=0)
+	return img, fx, fy
+
+
 sys.setrecursionlimit(40000)
 
 parser = OptionParser()
@@ -88,6 +125,8 @@ parser.add_option("--config_filename", dest="config_filename", help=
 				default="config.pickle")
 parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of simple or pascal_voc",
 				default="pascal_voc")
+parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.",
+                  default='resnet50')
 
 (options, args) = parser.parse_args()
 
@@ -108,6 +147,12 @@ with open(config_output_filename, 'rb') as f_in:
 	C = pickle.load(f_in)
 	print(C)
 
+
+if C.network == 'resnet50':
+	import keras_frcnn.resnet as nn
+elif C.network == 'vgg':
+	import keras_frcnn.vgg as nn
+
 # turn off any data augmentation at test time
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
@@ -115,31 +160,6 @@ C.rot_90 = False
 
 img_path = options.test_path
 
-
-def format_img(img, C):
-	img_min_side = float(C.im_size)
-	(height,width,_) = img.shape
-	
-	if width <= height:
-		f = img_min_side/width
-		new_height = int(f * height)
-		new_width = int(img_min_side)
-	else:
-		f = img_min_side/height
-		new_width = int(f * width)
-		new_height = int(img_min_side)
-	fx = width/float(new_width)
-	fy = height/float(new_height)
-	img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
-	img = img[:, :, (2, 1, 0)]
-	img = img.astype(np.float32)
-	img[:, :, 0] -= C.img_channel_mean[0]
-	img[:, :, 1] -= C.img_channel_mean[1]
-	img[:, :, 2] -= C.img_channel_mean[2]
-	img /= C.img_scaling_factor
-	img = np.transpose(img, (2, 0, 1))
-	img = np.expand_dims(img, axis=0)
-	return img, fx, fy
 
 
 class_mapping = C.class_mapping
@@ -152,12 +172,25 @@ print(class_mapping)
 class_to_color = {class_mapping[v]: np.random.randint(0, 255, 3) for v in class_mapping}
 C.num_rois = int(options.num_rois)
 
-if K.image_dim_ordering() == 'th':
+
+if C.network == 'resnet50':
+	num_features = 1024
+elif C.network == 'vgg':
+	num_features = 512
+
+if K.common.image_dim_ordering() == 'th':
 	input_shape_img = (3, None, None)
-	input_shape_features = (1024, None, None)
+	input_shape_features = (num_features, None, None)
 else:
 	input_shape_img = (None, None, 3)
-	input_shape_features = (None, None, 1024)
+	input_shape_features = (None, None, num_features)
+
+# if K.image_dim_ordering() == 'th':
+# 	input_shape_img = (3, None, None)
+# 	input_shape_features = (1024, None, None)
+# else:
+# 	input_shape_img = (None, None, 3)
+# 	input_shape_features = (None, None, 1024)
 
 
 img_input = Input(shape=input_shape_img)
@@ -192,6 +225,15 @@ T = {}
 P = {}
 mAPs = []
 imgout = []
+
+img_name_list = []
+x1_list = []
+x2_list = []
+y1_list = []
+y2_list = []
+
+bbox_threshold = 0.5
+
 
 for idx, img_data in enumerate(all_imgs):
 	print('{}/{}'.format(idx,len(all_imgs)))
@@ -236,7 +278,7 @@ for idx, img_data in enumerate(all_imgs):
 
 		for ii in range(P_cls.shape[1]):
 
-			if np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1):
+			if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1):
 				continue
 
 			cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
@@ -268,17 +310,26 @@ for idx, img_data in enumerate(all_imgs):
 		new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]), overlap_thresh=0.5)
 		for jk in range(new_boxes.shape[0]):
 			(x1, y1, x2, y2) = new_boxes[jk, :]
+
+			(height, width, _) = img.shape
+			ratio = C.im_size//height
+
+			(real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
+
+			img_name_list.append(img_data['filepath'])
+			x1_list.append(real_x1)
+			x2_list.append(real_x2)
+			y1_list.append(real_y1)
+			y2_list.append(real_y2)
+
 			det = {'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2, 'class': key, 'prob': new_probs[jk]}
 			all_dets.append(det)
 
+	print('predicted box', all_dets)
 	print('ground truth box', img_data['bboxes'])
-	print(fx)
-	print(fy)
+
 	print('Elapsed time = {}'.format(time.time() - st))
 	t, p = get_map(all_dets, img_data['bboxes'], (fx, fy))
-
-	print("the get_map t is", t)
-	print("the get_map p is", p)
 
 	for key in t.keys():
 		if key not in T:
@@ -301,6 +352,11 @@ df = pd.DataFrame(data={'file_path': imgout, 'mean_average_precision': mAPs})
 
 outpath = os.path.join(os.path.dirname(options.test_path), 'test_mAPs.csv')
 df.to_csv(outpath, encoding='utf-8', sep=',', index=False)
+
+
+################# saving the results(bounding boxes) in a csv
+df = pd.DataFrame(data={"img_name": img_name_list, "x1": x1_list, "y1": y1_list, "x2": x2_list, "y2": y2_list})
+df.to_csv("bounding_box_coordinates_measure.csv", sep=',', index=False)
 
 
 
