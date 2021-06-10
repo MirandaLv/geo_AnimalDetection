@@ -19,7 +19,7 @@ Step2. Get pre-trained vgg16 weights, other weights can be found on the same rep
 
 Step3. Running on local computer.
 The train_fcnn.py is used to train the model based on the customed dataset.Open a terminal, and training the model with: 
-- python3 train_frcnn.py -o simple -p directory/to/in/processing_data/train_annotation.txt --num_epochs 1000 --input_weight_path directory/to/the/weights/downloaded/above/vgg16_weights_tf_dim_ordering_tf_kernels.h5 --output_weight_path model_frcnn_small_vgg.hdf5
+- python3 train_frcnn.py -o simple -p directory/to/in/processing_data/train_annotation.txt --num_epochs 1000 --input_weight_path directory/to/the/weights/downloaded/above/vgg16_weights_tf_dim_ordering_tf_kernels.h5 --output_weight_path model_frcnn_vgg.hdf5 --hf True --vf True --rot True --network vgg
 - Check on the train_frcnn.py to get detailed calling requirement.
 
 Step 4. Running on sciclone or use GPU to boost the training.
@@ -30,8 +30,10 @@ Step 4. Running on sciclone or use GPU to boost the training.
 Step 5. Running on cdsw using GPUs
 - Open a terminal, and copy the function call in step 3 to run training on cdsw.
 
-Step 6. Model validation (on-going)
-
+Step 6. Model validation
+- Running on testing and validation 
+- python3 test_frcnn.py -o simple -p directory/to/in/processing_data/test_annotation.txt --network vgg
+- Producing 1). bounding_box_coordinates.csv that hosts the new predicted bounding box of testing data; 2). test_mAPs.csv file that saves the mAP value for each testing image.
 
 
 ## Script description
