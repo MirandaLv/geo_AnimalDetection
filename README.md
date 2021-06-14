@@ -40,7 +40,6 @@ Step 6. Model validation
 ### Data processing
 - DataProcessing.py includes a series of support functions to preprocess the raw image and generate the image patches and annotations for training and validation.
 - get_data.py is a call script used to generate the image patches and annotations. The dimension of image patches can be assigned in here.
-- data_aggregation.py include script to split the raw image into image patches, these image patches will be used later on as input for model prediction.
 - jobscript: a script to submit jobs on sciclone
 ### Model processing
 The faster_rcnn folder includes all model related scripts, they are called on training and validation process
