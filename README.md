@@ -1,4 +1,4 @@
-# AnimalDetection
+# Animal Detection
 
 ## This post is an application of using deep learning method with drone imagery for detection of seabirds. 
 
