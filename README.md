@@ -1,6 +1,7 @@
 # geo_AnimalDetection
 
-This post is used to record the process of the animal detection project.
+This post is an application of using Faster RCNN with drone imagery for detection of seabirds. 
+
 
 Data preprocessing before Deep Learning:
 - Need to have a list of images with annotations indicating the bounding box of the class in the image and the associated class name
