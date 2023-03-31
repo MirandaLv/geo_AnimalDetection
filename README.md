@@ -1,6 +1,6 @@
 # geo_AnimalDetection
 
-This post is an application of using Faster RCNN with drone imagery for detection of seabirds. 
+This post is an application of using deep learning method with drone imagery for detection of seabirds. 
 
 
 Data preprocessing before Deep Learning:
